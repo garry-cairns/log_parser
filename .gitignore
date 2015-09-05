@@ -1,2 +1,7 @@
 /access.log
 /sample.log
+/.bash_history
+/.ghc/
+/.stack/
+/parser/.stack-work/
+/parser/LICENSE
