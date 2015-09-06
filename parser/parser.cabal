@@ -1,22 +1,25 @@
 name:                parser
 version:             0.1.0.0
-synopsis:            Initial project template from stack
+synopsis:            Apache logfile parser
 description:         Please see README.md
-homepage:            http://github.com/githubuser/parser#readme
+homepage:            https://github.com/garry-cairns/log_parser
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2010 Author Here
-category:            Web
+author:              Garry Cairns
+maintainer:          garryjcairns@gmail.com
+copyright:           2015 Garry Cairns
+category:            Executable
 build-type:          Simple
 -- extra-source-files:
 cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     LogParser
   build-depends:       base >= 4.7 && < 5
+                     , attoparsec
+                     , bytestring
+                     , time
   default-language:    Haskell2010
 
 executable parser-exe
@@ -38,4 +41,4 @@ test-suite parser-test
 
 source-repository head
   type:     git
-  location: https://github.com/githubuser/parser
+  location: https://github.com/garry-cairns/log_parser

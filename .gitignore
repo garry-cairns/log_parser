@@ -5,3 +5,5 @@
 /.stack/
 /parser/.stack-work/
 /parser/LICENSE
+/parser/.bash_history
+/parser/.stack/

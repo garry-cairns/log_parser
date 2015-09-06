@@ -1,4 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+-- We seek-- :
+-- total successful requests per minute;
+-- total error requests per minute;
+-- mean response time per minute; and
+-- MBs sent per minute
 
 -- Format:
 -- Remote IP | remote logname | remote user | time request received | "first line of request" | final status of request | size of response in bytes, excluding headers | time taken to serve request in microseconds
@@ -9,25 +14,21 @@
 module LogDataTypes where
 
 import Data.Attoparsec.ByteString.Char8
-import Data.ByteString.Char8 as S
+import qualified Data.ByteString.Char8 as S
 import Data.Time
-import Data.Time.Format
 
 data LogEntry = LogEntry {
     remoteIP      :: S.ByteString
   , remoteLogname :: S.ByteString
   , remoteUser    :: S.ByteString
-  , timeReceived  :: S.ByteString
+  , timeReceived  :: LocalTime
   , requestLine   :: S.ByteString
   , finalStatus   :: S.ByteString
   , responseSize  :: S.ByteString
   , responseTime  :: S.ByteString
   } deriving Show
 
--- logTimeFormat = "%d/%m/&Y:%H:%M:%S %z" :: String
-
--- stringToDateTime :: S.ByteString -> UTCTime
--- stringToDateTime = parseTime defaultTimeLocale logTimeFormat
+type Log = [LogEntry]
 
 quote, leftBracket, rightBracket, space' :: Parser Char
 quote        = satisfy (== '\"')
@@ -45,12 +46,26 @@ bracketedLogItem = do
   rightBracket
   return content
 
--- datetimeLogItem :: Parser S.ByteString
--- datetimeLogItem = do
---   leftBracket
---   content <- stringToDateTime(takeTill (== ']'))
---   rightBracket
---   return content
+datetimeLogItem :: Parser LocalTime
+datetimeLogItem = do
+  leftBracket
+  day <- count 2 digit
+  char '/'
+  month <- count 3 anyChar
+  char '/'
+  year <- count 2 digit
+  char ':'
+  hour <- count 2 digit
+  char ':'
+  minute <- count 2 digit
+  char ':'
+  second <- count 2 digit
+  space'
+  tz <- count 5 anyChar
+  rightBracket
+  return $ LocalTime { localDay = fromGregorian (read year) (read month) (read day)
+                     , localTimeOfDay = TimeOfDay (read hour) (read minute) (read second)
+                     }
 
 quotedLogItem :: Parser S.ByteString
 quotedLogItem = do
@@ -58,3 +73,22 @@ quotedLogItem = do
   content <- takeTill (== '\"')
   quote
   return content
+
+parseLogEntry :: Parser LogEntry
+parseLogEntry = do
+  ip <- logItem
+  space'
+  logName <- logItem
+  space'
+  user <- logItem
+  space'
+  time <- datetimeLogItem
+  space'
+  firstLogLine <- quotedLogItem
+  space'
+  finalRequestStatus <- logItem
+  space'
+  responseSizeB <- logItem
+  space'
+  timeToResponse <- logItem
+  return $ LogEntry ip logName user time firstLogLine finalRequestStatus responseSizeB timeToResponse
