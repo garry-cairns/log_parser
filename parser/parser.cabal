@@ -19,6 +19,7 @@ library
   build-depends:       base >= 4.7 && < 5
                      , attoparsec
                      , bytestring
+                     , old-locale
                      , time
   default-language:    Haskell2010
 
@@ -27,6 +28,10 @@ executable parser-exe
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
+                     , attoparsec
+                     , bytestring
+                     , old-locale
+                     , time
                      , parser
   default-language:    Haskell2010
 
@@ -35,6 +40,11 @@ test-suite parser-test
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
+                     , attoparsec
+                     , bytestring
+                     , hspec
+                     , old-locale
+                     , time
                      , parser
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
