@@ -1,9 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
--- We seek-- :
--- total successful requests per minute;
--- total error requests per minute;
--- mean response time per minute; and
--- MBs sent per minute
 
 module LogParser where
 
@@ -12,19 +7,6 @@ import Data.Attoparsec.ByteString.Char8
 import qualified Data.ByteString.Char8 as S
 import Data.Time
 import System.Locale
-
-data LogEntry = LogEntry {
-    remoteIP      :: S.ByteString
-  , remoteLogname :: S.ByteString
-  , remoteUser    :: S.ByteString
-  , timeReceived  :: UTCTime
-  , requestLine   :: S.ByteString
-  , finalStatus   :: S.ByteString
-  , responseSize  :: Int
-  , responseTime  :: Int
-  } deriving Show
-
-type Log = [LogEntry]
 
 logItem :: Parser S.ByteString
 logItem = takeTill (== ' ')
@@ -59,6 +41,18 @@ quotedLogItem = do
 
 -- Example:
 -- 127.0.0.1 - - [30/Mar/2015:05:04:20 +0100] "GET /render/?from=-11minutes&until=-5mins&uniq=1427688307512&format=json&target=alias%28movingAverage%28divideSeries%28sum%28nonNegativeDerivative%28collector.uk1.rou.*rou*.svc.*.RoutesService.routedate.total.processingLatency.totalMillis.count%29%29%2Csum%28nonNegativeDerivative%28collector.uk1.rou.*rou*.svc.*.RoutesService.routedate.total.processingLatency.totalCalls.count%29%29%29%2C%275minutes%27%29%2C%22Latency%22%29 HTTP/1.1" 200 157 165169
+
+data LogEntry = LogEntry {
+    remoteIP      :: S.ByteString
+  , remoteLogname :: S.ByteString
+  , remoteUser    :: S.ByteString
+  , timeReceived  :: UTCTime
+  , requestLine   :: S.ByteString
+  , finalStatus   :: S.ByteString
+  , responseSize  :: Int
+  , responseTime  :: Int
+  } deriving Show
+
 parseLogEntry :: Parser LogEntry
 parseLogEntry = do
   ip <- logItem
@@ -77,6 +71,8 @@ parseLogEntry = do
   char ' '
   timeToResponse <- intLogItem
   return $ LogEntry ip logName user time firstLogLine finalRequestStatus responseSizeB timeToResponse
+
+type Log = [LogEntry]
 
 parseLog :: Parser Log
 parseLog = many $ parseLogEntry <* endOfLine
