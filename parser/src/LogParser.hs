@@ -12,14 +12,12 @@ logItem :: Parser S.ByteString
 logItem = takeTill (== ' ')
 
 strToDate :: String -> UTCTime
-strToDate = readTime defaultTimeLocale "%d/%b/%Y:%T"
+strToDate = readTime defaultTimeLocale "%d/%b/%Y:%T %z"
 
 datetimeLogItem :: Parser UTCTime
 datetimeLogItem = do
   char '['
   date <- takeTill (== ' ')
-  char ' '
-  tz <- count 5 anyChar
   char ']'
   return $ strToDate $ S.unpack date
 
