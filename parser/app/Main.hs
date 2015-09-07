@@ -18,18 +18,15 @@ data Stats = Stats {
   , megabytesPerMinute          :: String
   } deriving Show
 
--- successesPerMinute :: 
--- getStats :: Log -> IO Stats
--- getStats = 1
+prepareStats :: Result Log -> IO ()
+prepareStats r =
+  case r of
+    Fail _ _ _ -> putStrLn $ "Parsing failed"
+    Done _ log -> putStrLn $ "Parsing succeeded"
 
 main :: IO ()
 main = do
   [f] <- getArgs
-  B.readFile (f :: FilePath) >>= print . parse parseLog
-
--- main :: IO ()
--- main = do
---   file <- B.readFile filePath
---   let parsedLog = do pl <- parse parseLog file
---                      return pl
---   print parsedLog
+  logFile <- B.readFile (f :: FilePath)
+  x <- prepareStats $ parse parseLog logFile
+  print x
