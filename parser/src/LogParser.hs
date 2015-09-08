@@ -16,9 +16,9 @@ strToDate = readTime defaultTimeLocale "%d/%b/%Y:%T %z"
 
 datetimeLogItem :: Parser UTCTime
 datetimeLogItem = do
-  char '['
-  date <- takeTill (== ' ')
-  char ']'
+  _ <- char '['
+  date <- takeTill (== ']')
+  _ <- char ']'
   return $ strToDate $ S.unpack date
 
 intLogItem :: Parser Int
@@ -28,17 +28,10 @@ intLogItem = do
 
 quotedLogItem :: Parser S.ByteString
 quotedLogItem = do
-  char '\"'
+  _ <- char '\"'
   content <- takeTill (== '\"')
-  char '\"'
+  _ <- char '\"'
   return content
-
-
--- Log entry format:
--- Remote IP | remote logname | remote user | time request received | "first line of request" | final status of request | size of response in bytes, excluding headers | time taken to serve request in microseconds
-
--- Example:
--- 127.0.0.1 - - [30/Mar/2015:05:04:20 +0100] "GET /render/?from=-11minutes&until=-5mins&uniq=1427688307512&format=json&target=alias%28movingAverage%28divideSeries%28sum%28nonNegativeDerivative%28collector.uk1.rou.*rou*.svc.*.RoutesService.routedate.total.processingLatency.totalMillis.count%29%29%2Csum%28nonNegativeDerivative%28collector.uk1.rou.*rou*.svc.*.RoutesService.routedate.total.processingLatency.totalCalls.count%29%29%29%2C%275minutes%27%29%2C%22Latency%22%29 HTTP/1.1" 200 157 165169
 
 data LogEntry = LogEntry {
     remoteIP      :: S.ByteString
@@ -46,7 +39,7 @@ data LogEntry = LogEntry {
   , remoteUser    :: S.ByteString
   , timeReceived  :: UTCTime
   , requestLine   :: S.ByteString
-  , finalStatus   :: S.ByteString
+  , finalStatus   :: Int
   , responseSize  :: Int
   , responseTime  :: Int
   } deriving Show
@@ -54,19 +47,19 @@ data LogEntry = LogEntry {
 parseLogEntry :: Parser LogEntry
 parseLogEntry = do
   ip <- logItem
-  char ' '
+  _ <- char ' '
   logName <- logItem
-  char ' '
+  _ <- char ' '
   user <- logItem
-  char ' '
+  _ <- char ' '
   time <- datetimeLogItem
-  char ' '
+  _ <- char ' '
   firstLogLine <- quotedLogItem
-  char ' '
-  finalRequestStatus <- logItem
-  char ' '
+  _ <- char ' '
+  finalRequestStatus <- intLogItem
+  _ <- char ' '
   responseSizeB <- intLogItem
-  char ' '
+  _ <- char ' '
   timeToResponse <- intLogItem
   return $ LogEntry ip logName user time firstLogLine finalRequestStatus responseSizeB timeToResponse
 

@@ -43,6 +43,7 @@ test-suite parser-test
                      , attoparsec
                      , bytestring
                      , hspec
+                     , hspec-attoparsec
                      , old-locale
                      , time
                      , parser
